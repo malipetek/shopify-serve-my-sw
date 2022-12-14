@@ -27,20 +27,12 @@ export function HomePage() {
               <Stack wrap={false} distribution="trailing" alignment="center">
                 <Stack.Item fill>
                   <TextContainer spacing="loose">
-                    <Heading> A/B Test Product Images Effortlessly </Heading>
+                    <Heading> Serve Theme Assets Through App Proxy </Heading>
                     <p>
-                      You add a product online, it is time to add some dope
-                      photos to make it appealing. How do you know you picked
-                      the right ones? What if an discarded photo would make more
-                      sales actually?
+                     Serve service workers or partytown from your assets
                     </p>
                     <p>
-                      Well let's find out together. "ABImage" app gets all your
-                      photos for a product and tests them over time to see which
-                      helps you make more sales. You can use "fire and forget"
-                      mode and let it sort images according to accumulated data,
-                      or read the report and decide yourself which images are
-                      going to be used.
+                      Simply select file from assets and include it from <code>/a/sw/asset-name.js</code>
                     </p>
                   </TextContainer>
                 </Stack.Item>

@@ -13,19 +13,19 @@ import { Toast, useAppBridge } from "@shopify/app-bridge-react";
 import { useSelector, useDispatch } from 'react-redux';
 import { on, off } from "../store/events";
 import { show, hide } from '../store/savebar';
+import { setOpenTheme, setAssets } from '../store/themes';
 
 export function Theme() {
   const { id } = useParams();
-  const [files, setFiles] = useState([]);
-  const [assets, setAssets] = useState([]);
-  const [jsAssets, setJsAssets] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const app = useAppBridge();
   const fetch = userLoggedInFetch(app);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const [ theme ] = useSelector(state => {
+    return state.themes.themes.slice().filter(t => t.id == id);
+  });
 
   useEffect(() => {
-    console.log('dispatching')
     if (selectedItems.length) {
       dispatch(show())
     } else {
@@ -34,23 +34,20 @@ export function Theme() {
   }, [selectedItems]);
 
   useEffect(() => {
+    // dispatch(setOpenTheme(id));
+
     (async () => {
       const resp = await fetch(`/app/api/assets/${id}`);
 
-      const themesJson = await resp.json();
-      setFiles(themesJson);
-      setAssets(themesJson.filter(asset => {
-        const { key } = asset;
-        const [folder, filename] = key.split("/");
-        if (folder != "assets") return false;
-        return true;
-      }));
-      setJsAssets(themesJson.filter(asset => {
+      const allAssets = await resp.json();
+      
+      const assets = allAssets.filter(asset => {
         const { key } = asset;
         const [folder, filename] = key.split("/");
         if (folder != "assets" || filename.indexOf('.js') < 0) return false;
         return true;
-      }));
+      })
+      dispatch(setAssets({id, assets}));
     })();
     return () => 1
   }, []);
@@ -81,13 +78,18 @@ export function Theme() {
   }, []);
 
   return (
-    <Page fullWidth title={"Theme"}>
+    <Page
+      fullWidth
+      title={ theme?.name || "Theme" }
+      breadcrumbs={[{content: 'Homepage', url: '/app'}]}
+    >
+      <h1> { theme?.assets?.length || 'no assets' } </h1>
       <Layout>
         <Layout.Section>
           <Card sectioned>
             <ResourceList
               resourceName={{ singular: "Asset", plural: "Assets" }}
-              items={jsAssets || []}
+              items={theme?.assets || []}
               selectedItems={selectedItems}
               onSelectionChange={setSelectedItems}
               selectable

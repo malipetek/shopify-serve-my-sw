@@ -9,24 +9,24 @@ export const counterSlice = createSlice({
   },
   reducers: {
     show: (state) => {
-      state.visible = true
+      return { ...state, visible: true };
     },
     hide: (state) => {
-      state.visible = false
+      return { ...state, visible: false };
     },
     disable: (state) => {
-      state.disabled = true
+      return { ...state, disabled: true };
     },
     enable: (state) => {
-      state.disabled = false
+     return {...state, disabled: false };
     },
     setLoading: (state, action) => {
-      state.loading = action.payload
+      return { ...state, loading: action.payload };
     }
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { show, hide, onSave, onDiscard } = counterSlice.actions
+export const { show, hide } = counterSlice.actions
 
 export default counterSlice.reducer

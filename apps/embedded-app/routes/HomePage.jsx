@@ -9,8 +9,6 @@ import {
   Heading,
 } from "@shopify/polaris";
 
-import trophyImgUrl from "../assets/home-trophy.png";
-
 import { ThemeList } from "../components/ThemeList";
 
 export function HomePage() {
