@@ -49,4 +49,4 @@ app.use(
 //     //   console.log(`Websocket connected to ${request.url}`);
 //     // });
 // });
-httpServer.listen(PORT, () => console.log("Listening"));
+httpServer.listen(PORT, () => console.log("Listening on ", PORT));
