@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import fs from "fs";
 import { resolve } from "path";
+import { proxy } from "./embedded-app/rest-endpoints/index.js";
 
 export default async (wss) => {
   let isProd = process.env.NODE_ENV === "production";
@@ -15,7 +16,6 @@ export default async (wss) => {
 
   let vite;
   if (!isProd) {
-    console.log("PORT ", PORT);
     vite = await import("vite").then(({ createServer }) =>
       createServer({
         configFile: `${process.cwd()}/apps/public-app/vite.config.js`,
@@ -45,6 +45,9 @@ export default async (wss) => {
 
     router.use(compression());
     router.use(serveStatic(resolve("dist/public")));
+    
+    router.get("/proxy/*", proxy(app));
+    
     router.use("*", (req, res, next) => {
       // Client-side routing will pick up on the correct route to render, so we always render the index here
       res

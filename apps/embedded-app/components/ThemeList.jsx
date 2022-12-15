@@ -8,17 +8,20 @@ import { useSelector, useDispatch } from 'react-redux';
 
 export function ThemeList() {
   const { themes } = useSelector(state => state.themes);
+  const { shop } = useSelector(state => state.shop);
   const app = useAppBridge();
   const fetch = userLoggedInFetch(app);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   
-  useEffect(() => { 
-    (async () => {
-      const resp = await fetch("/app/api/themes");
-      console.log("resp", resp);
-      return await resp.json();
-    })().then(
-      themesJson => dispatch(setThemes(themesJson)));
+  useEffect(() => {
+    if (themes && !themes.length) {
+      (async () => {
+        const resp = await fetch("/app/api/themes");
+        console.log("resp", resp);
+        return await resp.json();
+      })().then(
+        themesJson => dispatch(setThemes(themesJson)));
+    }
   }, []);
 
   return (

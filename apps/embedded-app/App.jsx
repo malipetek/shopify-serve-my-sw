@@ -24,9 +24,10 @@ import SaveBar from "./components/SaveBar";
 import { HomePage } from "./routes/HomePage";
 import { Theme } from "./routes/Theme";
 
-import { useEffect, useState } from 'react';
-import { Provider as ReduxProvider } from 'react-redux'
-import store from './store/store'
+import { Provider as ReduxProvider, useDispatch } from 'react-redux';
+import { useEffect } from "react";
+import store from './store/store';
+import { setShop } from './store/shop';
 
 export default function App() {
   return (
@@ -65,7 +66,14 @@ export default function App() {
 
 function MyProvider({ children }) {
   const app = useAppBridge();
-
+  const shop = new URL(location.href).searchParams.get("shop");
+  const dispatch = useDispatch();
+  
+  useEffect(() => {
+    console.log('setting shop ', shop);
+    dispatch(setShop(shop));
+  }, []);
+  
   const client = new ApolloClient({
     cache: new InMemoryCache(),
     link: new HttpLink({
