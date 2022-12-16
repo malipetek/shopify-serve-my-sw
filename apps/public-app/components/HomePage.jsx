@@ -41,7 +41,7 @@ export function HomePage() {
                     <Image
                       source={mageImgUrl}
                       alt="Nice work on building a Shopify app"
-                      width={300}
+                      width={240}
                     />
                     <Caption>
                       {" "}
