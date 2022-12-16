@@ -15,7 +15,7 @@ export default function applyAuthMiddleware(app, router, prefix) {
       res,
       req.query.shop,
       `${prefix}/auth/callback`,
-      app.get("use-online-tokens")
+      false
     );
 
     res.redirect(redirectUrl);
@@ -48,7 +48,7 @@ export default function applyAuthMiddleware(app, router, prefix) {
         res,
         req.query
       );
-
+      
       const host = req.query.host;
       app.set(
         "active-shopify-shops",
@@ -57,21 +57,7 @@ export default function applyAuthMiddleware(app, router, prefix) {
         })
       );
 
-      const response = await Shopify.Webhooks.Registry.register({
-        shop: session.shop,
-        accessToken: session.accessToken,
-        topic: "APP_UNINSTALLED",
-        path: "/webhooks",
-      });
-
-      if (!response["APP_UNINSTALLED"].success) {
-        console.log(
-          `Failed to register APP_UNINSTALLED webhook: ${response.result}`
-        );
-      }
-
-      // Redirect to app with shop parameter upon auth
-      res.redirect(`${prefix}/?shop=${session.shop}&host=${host}`);
+      return res.redirect(`${prefix}/?shop=${session.shop}&host=${host}`);
     } catch (e) {
       switch (true) {
         case e instanceof Shopify.Errors.InvalidOAuthError:
@@ -91,3 +77,4 @@ export default function applyAuthMiddleware(app, router, prefix) {
     }
   });
 }
+

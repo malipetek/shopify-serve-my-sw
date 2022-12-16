@@ -3,6 +3,8 @@ import { resolve } from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
+import { onlineSessionStore as sheetStore } from '../../helpers/store.js';
+
 import fs from "fs";
 import "dotenv/config";
 
@@ -10,7 +12,7 @@ import applyAuthMiddleware from "../../middleware/auth.js";
 import verifyRequest from "../../middleware/verify-request.js";
 import { themes, assets, files } from "./rest-endpoints/index.js";
 
-const USE_ONLINE_TOKENS = true;
+const USE_ONLINE_TOKENS = false;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
 const PORT = parseInt(process.env.PORT || "8081", 10);
@@ -22,9 +24,14 @@ Shopify.Context.initialize({
   SCOPES: process.env.SCOPES.split(","),
   HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
   API_VERSION: ApiVersion.April22,
-  IS_EMBEDDED_APP: true,
+  IS_EMBEDDED_APP: false,
+  USE_ONLINE_TOKENS,
   // This should be replaced with your preferred storage strategy
-  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
+  SESSION_STORAGE: new Shopify.Session.CustomSessionStorage(
+    sheetStore.storeCallback,
+    sheetStore.loadCallback,
+    sheetStore.deleteCallback,
+  )
 });
 
 // Storing the currently active shops in memory will force them to re-login when your server restarts. You should
@@ -52,6 +59,11 @@ export default async (app, wss) => {
 
   applyAuthMiddleware(app, router, prefix);
 
+  router.use((req, res, next) => {
+    // console.log('emb app');
+    next();
+  });
+
   router.post("/webhooks", async (req, res) => {
     try {
       await Shopify.Webhooks.Registry.process(req, res);
@@ -65,11 +77,8 @@ export default async (app, wss) => {
   });
 
   router.get("/products-count", verifyRequest(app), async (req, res) => {
-    const session = await Shopify.Utils.loadCurrentSession(
-      req,
-      res,
-      app.get("use-online-tokens")
-    );
+    const session = await Shopify.Utils.loadOfflineSession(req.query.shop);
+
     router.post("/graphql", verifyRequest(app), async (req, res) => {
       try {
         const response = await Shopify.Utils.graphqlProxy(req, res);
@@ -91,7 +100,7 @@ export default async (app, wss) => {
 
   router.use((req, res, next) => {
     const shop = req.query.shop;
-    if (Shopify.Context.IS_EMBEDDED_APP && shop) {
+    if (shop) {
       res.setHeader(
         "Content-Security-Policy",
         `frame-ancestors https://${shop} https://admin.shopify.com;`
@@ -102,7 +111,7 @@ export default async (app, wss) => {
     next();
   });
 
-  router.get("/api/themes", themes(app));
+  router.all("/api/themes", themes(app));
   router.get("/api/assets/:id", assets(app));
   router.all("/api/files/:shop/:theme/:filename?", files(app));
 

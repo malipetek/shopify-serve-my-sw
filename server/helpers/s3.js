@@ -55,7 +55,7 @@ function _downloadFiles({} = {}) {
     console.log("progress", downloader.progressAmount, downloader.progressTotal);
   });
   downloader.on('end', function() {
-    console.log("done uploading");
+    console.log("done downloading");
   });
 }
 export async function getDirectory({ directory }) {
@@ -79,7 +79,7 @@ export async function deleteFile({ directory, filename }) {
 }
 
 export function getFile({ directory, filename }) {
-  return fs.readFile(`${cacheFolder}/${directory}/${filename}`);
+  return fs.readFileSync(`${cacheFolder}/${directory}/${filename}`);
 }
 
 export const uploadFiles = debounce(_uploadFiles, 5000);

@@ -3,16 +3,19 @@ import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import fs from "fs";
 import { resolve } from "path";
-import { proxy } from "./embedded-app/rest-endpoints/index.js";
 
-export default async (wss) => {
+export default async (app, wss) => {
   let isProd = process.env.NODE_ENV === "production";
   const PORT = parseInt(process.env.PORT || "8081", 10);
   const isTest =
     process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
 
-  const app = express();
   const router = express.Router();
+
+  router.use((req, res, next) => {
+    // console.log('public app', req.path);
+    next();
+  });
 
   let vite;
   if (!isProd) {
@@ -45,9 +48,6 @@ export default async (wss) => {
 
     router.use(compression());
     router.use(serveStatic(resolve("dist/public")));
-    
-    router.get("/proxy/*", proxy(app));
-    
     router.use("*", (req, res, next) => {
       // Client-side routing will pick up on the correct route to render, so we always render the index here
       res
@@ -56,8 +56,6 @@ export default async (wss) => {
         .send(fs.readFileSync(`${process.cwd()}/dist/public/index.html`));
     });
   }
-
-  app.use(router);
 
   return router;
 };

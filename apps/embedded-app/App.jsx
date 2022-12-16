@@ -66,11 +66,11 @@ export default function App() {
 
 function MyProvider({ children }) {
   const app = useAppBridge();
-  const shop = new URL(location.href).searchParams.get("shop");
+  const baseurl = new URL(location.href);
+  const shop = baseurl.searchParams.get("shop");
   const dispatch = useDispatch();
   
   useEffect(() => {
-    console.log('setting shop ', shop);
     dispatch(setShop(shop));
   }, []);
   
@@ -84,12 +84,18 @@ function MyProvider({ children }) {
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
 }
+let baseurl;
 
 export function userLoggedInFetch(app) {
+  baseurl = baseurl || new URL(location.href);
+
   const fetchFunction = authenticatedFetch(app);
 
   return async (uri, options) => {
-    const response = await fetchFunction(uri, options);
+    const [pathname, search] = uri.split('?');
+    baseurl.pathname = pathname;
+    baseurl.search += '&' + search;
+    const response = await fetchFunction(baseurl.href, options);
 
     if (
       response.headers.get("X-Shopify-API-Request-Failure-Reauthorize") === "1"

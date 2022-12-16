@@ -9,20 +9,15 @@ const TEST_GRAPHQL_QUERY = `
 
 export default function verifyRequest(app, { returnHeader = true } = {}) {
   return async (req, res, next) => {
-    const session = await Shopify.Utils.loadCurrentSession(
-      req,
-      res,
-      app.get("use-online-tokens")
-    );
+    const session = await Shopify.Utils.loadOfflineSession(req.query.shop);
 
     let shop = req.query.shop;
 
     if (session && shop && session.shop !== shop) {
       // The current request is for a different shop. Redirect gracefully.
-      return res.redirect(`/auth?shop=${shop}`);
+      return res.redirect(`/app/auth?shop=${shop}`);
     }
 
-    if (session?.isActive()) {
       try {
         // make a request to make sure oauth has succeeded, retry otherwise
         const client = new Shopify.Clients.Graphql(
@@ -41,7 +36,7 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
           throw e;
         }
       }
-    }
+    
 
     if (returnHeader) {
       if (!shop) {
@@ -69,11 +64,11 @@ export default function verifyRequest(app, { returnHeader = true } = {}) {
       res.header("X-Shopify-API-Request-Failure-Reauthorize", "1");
       res.header(
         "X-Shopify-API-Request-Failure-Reauthorize-Url",
-        `/auth?shop=${shop}`
+        `/app/auth?shop=${shop}`
       );
       res.end();
     } else {
-      res.redirect(`/auth?shop=${shop}`);
+      res.redirect(`/app/auth?shop=${shop}`);
     }
   };
 }

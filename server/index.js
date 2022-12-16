@@ -4,6 +4,9 @@ import express from "express";
 import "dotenv/config";
 import embeddedApp from "./sub-apps/embedded-app/embedded-app.js";
 import publicApp from "./sub-apps/public-app.js";
+import { proxy } from "./sub-apps/embedded-app/rest-endpoints/index.js";
+
+import './helpers/store.js';
 
 const PORT = parseInt(process.env.PORT || "8081", 10);
 
@@ -19,21 +22,13 @@ app.use((req, res, next) => {
 });
 
 app.use(
-  "/app",
-  (req, res, next) => {
-    // console.log('emb app');
-    next();
-  },
-  await embeddedApp(app, wss)
+  "/app", await embeddedApp(app, wss)
 );
 
+app.use("/proxy/:theme?/:file?", proxy);
+
 app.use(
-  "/",
-  (req, res, next) => {
-    // console.log('public app', req.path);
-    next();
-  },
-  await publicApp(wss)
+  "/", await publicApp(app, wss)
 );
 
 // httpServer.on('upgrade', (request, socket, head) => {

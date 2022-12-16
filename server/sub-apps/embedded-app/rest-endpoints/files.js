@@ -6,12 +6,14 @@ export default function (app) {
   return [
     verifyRequest(app),
     async (req, res) => {
-      const { shop, theme, filename } = req.params;
+      let { shop, theme, filename } = req.params;
       const { theme_id } = req.query;
+      theme = encodeURIComponent(theme);
+      filename = encodeURIComponent(filename);
 
       switch (req.method) {
         case 'POST':
-          const session = await Shopify.Utils.loadCurrentSession(req, res, app.get("use-online-tokens"));
+          const session = await Shopify.Utils.loadOfflineSession(req.query.shop);
     
           const { Asset } = await import(
             `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`

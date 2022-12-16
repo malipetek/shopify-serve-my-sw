@@ -5,9 +5,7 @@ import { trigger } from "../store/events";
 
 function SaveBar() {
   const { loading, disabled, visible } = useSelector((state) => state.savebar);
-  useEffect(() => {
-    console.log('savebar rerender');
-  })
+  
   return (
     <div style={{ height: '50px' }}>
       {

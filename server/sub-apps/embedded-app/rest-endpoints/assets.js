@@ -6,11 +6,7 @@ export default function (app) {
     verifyRequest(app),
     async (req, res) => {
       const theme_id = req.params.id;
-      const session = await Shopify.Utils.loadCurrentSession(
-        req,
-        res,
-        app.get("use-online-tokens")
-      );
+      const session = await Shopify.Utils.loadOfflineSession(req.query.shop);
 
       const { Asset } = await import(
         `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`

@@ -1,11 +1,10 @@
-import verifyRequest from "../../../middleware/verify-request.js";
-import { downloadFiles, uploadFiles, getDirectory, getFile, saveFile, deleteFile, createDirectory } from '../../../helpers/s3.js';
+import { getFile } from '../../../helpers/s3.js';
 
-export default function (app) {
-  return [
-    async (req, res) => {
-      const { shop, theme, filename } = req.params;
-      res.status(200).send(getFile());
-    },
-  ];
+export default function (req, res, next) {
+  const shop = req.headers['x-shop-domain'];
+  const { theme, file } = req.params;
+  const directory = `${shop}/${decodeURIComponent(theme)}`;
+  const filename = `${decodeURIComponent(file)}`;
+  res.set('content-type', 'text/javascript');
+  res.status(200).send(getFile({ directory, filename }).toString());
 }

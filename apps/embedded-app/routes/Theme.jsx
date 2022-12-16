@@ -102,8 +102,7 @@ export function Theme() {
   }, [selectedItems, initialSelectedItems]);
   
   const discard = useCallback(() => {
-    console.log('discarding');
-
+    setSelectedItems(initialSelectedItems);
   });
 
   useEffect(() => {
@@ -122,17 +121,17 @@ export function Theme() {
     }
   }, [selectedItems, initialSelectedItems]);
 
-  const itemClicked = useCallback((asset) => {
-    if (selectedItems.includes(asset.key)) {
-      setSelectedItems(
-        selectedItems.slice().filter(i => i != asset.key)
-      );
-    } else {
-      setSelectedItems([
-        ...selectedItems,
-        asset.key
-      ]);
-    }
+  const itemClicked = useCallback((e, asset) => {
+      if (e.target.tagName != 'INPUT' && e.target.type != 'text') {
+        if (selectedItems.includes(asset.key)) {
+          setSelectedItems(s => s.slice().filter(i => i != asset.key));
+        } else {
+          setSelectedItems(s => [
+            ...s,
+            asset.key
+          ]);
+        }
+      }
   }, [selectedItems, theme]);
 
   return (
@@ -157,11 +156,7 @@ export function Theme() {
                     id={key}
                     accessibilityLabel={`Select ${key} for serving from an app proxy`}
                   >
-                    <div onClick={(e) => {
-                      if (e.target.tagName != 'INPUT' && e.target.type != 'text') {
-                        itemClicked(asset);
-                      }
-                    }}
+                    <div onClick={(e) => itemClicked(e, asset)}
                     style={{
                       padding: "1em 2em 1em 4em",
                       margin: "-1em -2em -1em -4em",
