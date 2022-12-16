@@ -20,3 +20,4 @@ config/tunnel.pid
 # webpack build output
 dist/
 .vscode/
+cachedFiles/
