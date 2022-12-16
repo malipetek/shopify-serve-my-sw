@@ -13,7 +13,7 @@ import verifyRequest from "../../middleware/verify-request.js";
 import { themes, assets, files } from "./rest-endpoints/index.js";
 
 const USE_ONLINE_TOKENS = false;
-const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
+const TOP_LEVEL_OAUTH_COOKIE = "serve_my_sw_dev_371836187263";
 
 const PORT = parseInt(process.env.PORT || "8081", 10);
 const isTest = process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
@@ -155,13 +155,7 @@ export default async (app, wss) => {
     );
 
     router.use(compression());
-    router.use(
-      "/*",
-      (req, res, next) => {
-        next();
-      },
-      serveStatic(resolve("dist/embedded"))
-    );
+    router.use(serveStatic(resolve("dist/embedded")));
   }
 
   router.use("/*", (req, res, next) => {
