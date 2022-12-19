@@ -28,11 +28,11 @@ const baseParams = {
 function _uploadFiles({ directory } = { directory: undefined }) {
     const uploader = client.uploadDir({
       ...baseParams,
-        localDir: `${cacheFolder}${directory ? `/${directory}` : ''}`,
+        localDir: `${cacheFolder}${directory ? `/${encodeURIComponent(directory)}` : ''}`,
         deleteRemoved: true,
         s3Params: {
         ...baseParams.s3Params,
-          Prefix: directory
+          Prefix: encodeURIComponent(directory)
         }
     });
     uploader.on('error', function(err) {
@@ -59,8 +59,8 @@ function _downloadFiles({} = {}) {
   });
 }
 export async function getDirectory({ directory }) {
-  if (await fs.pathExists(`${cacheFolder}/${directory}`)) {
-    return fs.readdir(`${cacheFolder}/${directory}`);
+  if (await fs.pathExists(`${cacheFolder}/${encodeURIComponent(directory)}`)) {
+    return fs.readdir(`${cacheFolder}/${encodeURIComponent(directory)}`);
   } else {
     return [];
   }
@@ -69,17 +69,17 @@ export function createDirectory({ directory }) {
   return fs.mkdir(`${cacheFolder}/${directory}`);
 }
 export async function saveFile({ directory, filename, file }) {
-  await fs.ensureFile(`${cacheFolder}/${directory}/${filename}`);
-  return fs.writeFile(`${cacheFolder}/${directory}/${filename}`, file);
+  await fs.ensureFile(`${cacheFolder}/${encodeURIComponent(directory)}/${filename}`);
+  return fs.writeFile(`${cacheFolder}/${encodeURIComponent(directory)}/${filename}`, file);
 }
 export async function deleteFile({ directory, filename }) {
-  if (fs.existsSync(`${cacheFolder}/${directory}/${filename}`)) {
-    return fs.unlink(`${cacheFolder}/${directory}/${filename}`);
+  if (fs.existsSync(`${cacheFolder}/${encodeURIComponent(directory)}/${filename}`)) {
+    return fs.unlink(`${cacheFolder}/${encodeURIComponent(directory)}/${filename}`);
   }
 }
 
 export function getFile({ directory, filename }) {
-  return fs.readFileSync(`${cacheFolder}/${directory}/${filename}`);
+  return fs.readFileSync(`${cacheFolder}/${encodeURIComponent(directory)}/${filename}`);
 }
 
 export const uploadFiles = debounce(_uploadFiles, 5000);
